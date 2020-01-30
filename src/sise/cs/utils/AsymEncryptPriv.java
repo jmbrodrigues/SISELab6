@@ -5,30 +5,29 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.UnsupportedEncodingException;
-import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.*;
-import java.security.spec.X509EncodedKeySpec;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
 import java.util.Scanner;
 
 
-public class AsymEncrypt {
+public class AsymEncryptPriv {
     private Cipher cipher;
 
-    public AsymEncrypt() throws NoSuchAlgorithmException, NoSuchPaddingException {
+    public AsymEncryptPriv() throws NoSuchAlgorithmException, NoSuchPaddingException {
         this.cipher = Cipher.getInstance("RSA");
     }
 
 
-    public PublicKey getPublic(String filename) throws Exception {
+    // https://docs.oracle.com/javase/8/docs/api/java/security/spec/PKCS8EncodedKeySpec.html
+    public PrivateKey getPrivate(String filename) throws Exception {
         byte[] keyBytes = Files.readAllBytes(new File(filename).toPath());
-        X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
+        PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
         KeyFactory kf = KeyFactory.getInstance("RSA");
-        return kf.generatePublic(spec);
+        return kf.generatePrivate(spec);
     }
 
 
@@ -43,13 +42,13 @@ public class AsymEncrypt {
 
     public static void main(String[] args) throws Exception {
         //start the encryption framework
-        AsymEncrypt ac = new AsymEncrypt();
+        AsymEncryptPriv ac = new AsymEncryptPriv();
 
-        // load the public key
-        System.out.print("insert the path to the public keyfile (ex. 'keys\\user1PublicKey') :");
+        // load the private key
+        System.out.print("insert the path to the private keyfile (ex. 'keys\\user1PrivateKey') :");
         Scanner path = new Scanner(System.in);
         String keyfile = path.nextLine();
-        PublicKey publicKey = ac.getPublic(Paths.get("").toAbsolutePath() + System.getProperty("file.separator") + keyfile);
+        PrivateKey privateKey = ac.getPrivate(Paths.get("").toAbsolutePath() + System.getProperty("file.separator") + keyfile);
 
         //read message from the command line
         System.out.print("Message: ");
@@ -57,7 +56,7 @@ public class AsymEncrypt {
         String msg = in.nextLine();
 
         //encrypt the message
-        String encrypted_msg = ac.encryptText(msg, publicKey);
+        String encrypted_msg = ac.encryptText(msg, privateKey);
 
         System.out.println("Original Message: " + msg +
                 "\nEncrypted Message: " + encrypted_msg);

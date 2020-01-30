@@ -9,25 +9,24 @@ import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.*;
-import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.Scanner;
 
 
-public class AsymDecrypt {
+public class AsymDecryptPub {
     private Cipher cipher;
 
-    public AsymDecrypt() throws NoSuchAlgorithmException, NoSuchPaddingException {
+    public AsymDecryptPub() throws NoSuchAlgorithmException, NoSuchPaddingException {
         this.cipher = Cipher.getInstance("RSA");
     }
 
 
-    // https://docs.oracle.com/javase/8/docs/api/java/security/spec/PKCS8EncodedKeySpec.html
-    public PrivateKey getPrivate(String filename) throws Exception {
+    public PublicKey getPublic(String filename) throws Exception {
         byte[] keyBytes = Files.readAllBytes(new File(filename).toPath());
-        PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
+        X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
         KeyFactory kf = KeyFactory.getInstance("RSA");
-        return kf.generatePrivate(spec);
+        return kf.generatePublic(spec);
     }
 
 
@@ -41,15 +40,14 @@ public class AsymDecrypt {
 
     public static void main(String[] args) throws Exception {
         //start the encryption framework
-        AsymDecrypt ac = new AsymDecrypt();
+        AsymDecryptPub ad = new AsymDecryptPub();
 
-        //load private key file
-        // load the public key
-        System.out.print("insert the path to the public keyfile (ex. 'keys\\user1PrivateKey'): ");
+        //load public key file
+        System.out.print("insert the path to the public keyfile (ex. 'keys\\user1PublicKey'): ");
         Scanner path = new Scanner(System.in);
         String keyfile = path.nextLine();
 
-        PrivateKey privateKey = ac.getPrivate(Paths.get("").toAbsolutePath() + System.getProperty("file.separator") + keyfile);
+        PublicKey publicKey = ad.getPublic(Paths.get("").toAbsolutePath() + System.getProperty("file.separator") + keyfile);
 
         //read encrypted message from the command line
         System.out.print("Encrypted Message: ");
@@ -57,7 +55,7 @@ public class AsymDecrypt {
         String encrypted_msg = in.nextLine();
 
         //decrypt message
-        String decrypted_msg = ac.decryptText(encrypted_msg, privateKey);
+        String decrypted_msg = ad.decryptText(encrypted_msg, publicKey);
 
         System.out.println("\nEncrypted Message: " + encrypted_msg +
                 "\nDecrypted Message: " + decrypted_msg);
