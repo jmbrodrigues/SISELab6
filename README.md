@@ -1,6 +1,8 @@
 # SISELab6
 Lab6 worksheet  - Security - Cryptography - Digital signatures
 
+The following steps are to test the confidentiality property.
+
 1. Start by creating the key pair running the key generator app (KeyGenerator).
 The keyfiles are stored into the "keys" folder.
 
